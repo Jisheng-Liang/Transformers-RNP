@@ -10,7 +10,7 @@ Predicting the mutation effect on the stability of Protein-RNA complex with deep
 ## Dataset
 * The use of ProNAB Dataset has been approved by the author. ProNAB Dataset will not be disclosed in this repository. You may try your own dataset on training and testing.
 * HHblits files should be placed in `hhblits` folder, including both the original and mutant Protein HHblits matrices.
-* Split the dataset into three files - 'train.csv', 'val.csv', and 'test.csv'. Each file contatins the original sequence, the mutant sequence, and the RNA sequence. A sample file has been provided as 'sample.csv'.
+* Split the dataset into three files - `train.csv`, `val.csv`, and `test.csv`. Each file contatins the original sequence, the mutant sequence, and the RNA sequence. A sample file has been provided as `sample.csv`.
 ## Training
 ```
 python main.py
