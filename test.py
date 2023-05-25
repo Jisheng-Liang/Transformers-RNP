@@ -8,11 +8,10 @@ import pandas as pd
 import math
 
 def main():
-    epochs = 500
     batch_size = 128
     root_dir = "./"
     data_csv = "final_rna.csv"
-    hhblits_dir = "new/"
+    hhblits_dir = "hhblits/"
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
     dataset = []
