@@ -9,7 +9,7 @@ Predicting the mutation effect on the stability of Protein-RNA complex with deep
 
 ## Dataset
 The use of ProNAB Dataset has been approved by the author. ProNAB Dataset will not be disclosed in this repository. You may try your own dataset on training and testing.
-HHblits files should be placed in `hhblits` folder.
+  HHblits files should be placed in `hhblits` folder.
 
 
 ## Training
