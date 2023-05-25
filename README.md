@@ -8,13 +8,17 @@ Predicting the mutation effect on the stability of Protein-RNA complex with deep
 - [HH-suite](https://github.com/soedinglab/hh-suite) for generating HHblits files from protein sequences (with the file suffix of .hhm)
 
 ## Dataset
-The use of ProNAB Dataset has been approved by the author. ProNAB Dataset will not be disclosed in this repository. You may try your own dataset on training and testing.
-  HHblits files should be placed in `hhblits` folder.
-
+*The use of ProNAB Dataset has been approved by the author. ProNAB Dataset will not be disclosed in this repository. You may try your own dataset on training and testing.
+*HHblits files should be placed in `hhblits` folder.
+*Split the dataset into three files - 'train.csv', 'val.csv', and 'test.csv'.
 
 ## Training
-
+```
+python main.py
+```
 
 ## Testing
-
+```
+python test.py
+```
 ## Citation
