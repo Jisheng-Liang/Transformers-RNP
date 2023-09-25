@@ -151,3 +151,25 @@ class tensorDataset(object):
         train_dataset, val_dataset, test_dataset = random_split(dataset, lengths = ran_spl)
 
         return train_dataset, val_dataset, test_dataset
+
+def pdb_encoder(pdb_path,df):
+    ori_hhb = []
+    seq_len = 1000
+    row = df.shape[0]
+
+    for i in range(row):
+        # retrieve mut hhb
+        
+        ori_path = pdb_path + '/pro_ori_' + str(df.iloc[i,0]) + '.txt'
+        ori_matrix = np.loadtxt(ori_path)
+
+        # padding
+        if ori_matrix.shape[0]<seq_len:
+            z = np.zeros((seq_len-ori_matrix.shape[0],30))
+            ori_matrix = np.vstack((ori_matrix,z))
+        else:
+            ori_matrix = ori_matrix[:seq_len,:]
+        
+        ori_hhb.append(ori_matrix)
+    ori_hhb = np.array(ori_hhb)
+    return ori_hhb

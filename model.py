@@ -237,126 +237,72 @@ class BLSTMRegressor(nn.Module):
         preds = self.linearout(preds)
         # preds = torch.squeeze(preds,1)
         return preds
- 
+
 # class Trans(nn.Module):
-#     def __init__(self,num_layers=1,dropout=0.01,nhead=10, d_model=60):
+#     def __init__(self, hidden_layers=1, nhead=10, pro_model=20, hhb_model=30, na_model=4, embed_dim=60, dropout=0.1):
 #         super(Trans, self).__init__()
-#         # X_ori, X_mut
-#         self.d_model = d_model
-#         self.pos_encoder1 = PositionalEncoding(d_model=d_model,max_len=1000)
-#         self.encoder_layer1 = nn.TransformerEncoderLayer(d_model=d_model, nhead=nhead, dropout=dropout, 
-#                                                          activation='gelu', layer_norm_eps=1e-12)
-#         self.transformer_encoder1 = nn.TransformerEncoder(self.encoder_layer1, num_layers=num_layers)
-#         self.encoder1 = nn.Linear(20,d_model); self.decoder1 = nn.Linear(d_model,10)
 
-#         self.encoder_layer11 = nn.TransformerEncoderLayer(d_model=d_model, nhead=nhead, dropout=dropout, 
-#                                                           activation='gelu', layer_norm_eps=1e-12)
-#         self.transformer_encoder11 = nn.TransformerEncoder(self.encoder_layer11, num_layers=num_layers)
-#         self.encoder11 = nn.Linear(20,d_model); self.decoder11 = nn.Linear(d_model,10)
-
-#         # X_orihhb, X_muthhb
-#         self.pos_encoder2 = PositionalEncoding(d_model=d_model,max_len=1000)
-#         self.encoder_layer2 = nn.TransformerEncoderLayer(d_model=d_model, nhead=nhead, dropout=dropout, 
-#                                                          activation='gelu', layer_norm_eps=1e-12)
-#         self.transformer_encoder2 = nn.TransformerEncoder(self.encoder_layer2, num_layers=num_layers)
-#         self.encoder2 = nn.Linear(30,d_model); self.decoder2 = nn.Linear(d_model,10)
-
-#         self.encoder_layer22 = nn.TransformerEncoderLayer(d_model=d_model, nhead=nhead, dropout=dropout, 
-#                                                           activation='gelu', layer_norm_eps=1e-12)
-#         self.transformer_encoder22 = nn.TransformerEncoder(self.encoder_layer22, num_layers=num_layers)
-#         self.encoder22 = nn.Linear(30,d_model); self.decoder22 = nn.Linear(d_model,10)
-
-#         # X_na
-#         self.pos_encoder3 = PositionalEncoding(d_model=d_model,max_len=100)
-#         self.encoder_layer3 = nn.TransformerEncoderLayer(d_model=d_model, nhead=nhead, dropout=dropout, 
-#                                                          activation='gelu', layer_norm_eps=1e-12)
-#         self.transformer_encoder3 = nn.TransformerEncoder(self.encoder_layer3, num_layers=num_layers)
-#         self.encoder3 = nn.Linear(4,d_model); self.decoder3 = nn.Linear(d_model,10)
-
-#         # deco
-#         self.deco1 = nn.Linear(1000*10,4096)
-#         self.deco11 = nn.Linear(1000*10,4096)
-#         self.deco2 = nn.Linear(1000*10,4096)
-#         self.deco22 = nn.Linear(1000*10,4096)
-#         self.deco3 = nn.Linear(100*10,1000)
-
-#         # linear
-#         self.act = nn.ReLU()
-#         self.dropout = nn.Dropout(p=dropout)
-#         self.linear1 = nn.Linear(17384, 4096)
-#         self.linear2 = nn.Linear(4096, 1024)
-#         self.linear3 = nn.Linear(1024, 256)
-#         self.linearout = nn.Linear(256, 1)
-
-#     def forward(self, X_ori, X_mut, X_orihhb, X_muthhb, X_na, device_id):
-
-#         X_ori = X_ori.permute(1,0,2); X_mut = X_mut.permute(1,0,2)
-#         X_orihhb = X_orihhb.permute(1,0,2); X_muthhb = X_muthhb.permute(1,0,2)
-#         X_na = X_na.permute(1,0,2)
-
-#         # mask
-#         mask1 = self._generate_square_subsequent_mask(1000).to(device_id)
-#         mask2 = self._generate_square_subsequent_mask(100).to(device_id)
-        
-#         # Encoder
-#         X_ori = self.encoder1(X_ori)
-#         X_mut = self.encoder11(X_mut)
-#         X_orihhb = self.encoder2(X_orihhb)
-#         X_muthhb = self.encoder22(X_muthhb)
-#         X_na = self.encoder3(X_na)
-
-#         # positionencoding
-#         X_ori = self.pos_encoder1(X_ori*math.sqrt(self.d_model)); X_mut= self.pos_encoder1(X_mut*math.sqrt(self.d_model))
-#         X_orihhb = self.pos_encoder2(X_orihhb*math.sqrt(self.d_model)); X_muthhb = self.pos_encoder2(X_muthhb*math.sqrt(self.d_model))
-#         X_na = self.pos_encoder3(X_na*math.sqrt(self.d_model))
-        
-#         # transformer
-#         X_ori = self.transformer_encoder1(X_ori,mask1)
-#         X_mut= self.transformer_encoder11(X_mut,mask1)
-#         X_orihhb = self.transformer_encoder2(X_orihhb,mask1)
-#         X_muthhb = self.transformer_encoder22(X_muthhb,mask1)
-#         X_na = self.transformer_encoder3(X_na,mask2)
+#         # TransformerEncoder
+#         self.transencoder1 = TransformerEncoder(hidden_layers, vocab_size=pro_model, embed_dim=embed_dim, num_heads=nhead)
+#         self.transencoder2 = TransformerEncoder(hidden_layers, vocab_size=pro_model, embed_dim=embed_dim, num_heads=nhead)
+#         self.transencoder3 = TransformerEncoder(hidden_layers, vocab_size=hhb_model, embed_dim=embed_dim, num_heads=nhead)
+#         self.transencoder4 = TransformerEncoder(hidden_layers, vocab_size=hhb_model, embed_dim=embed_dim, num_heads=nhead)
+#         self.transencoder5 = TransformerEncoder(hidden_layers, vocab_size=na_model, embed_dim=embed_dim, num_heads=nhead)
         
 #         # decoder
-#         X_ori = self.decoder1(X_ori)
-#         X_mut = self.decoder11(X_mut)
-#         X_orihhb = self.decoder2(X_orihhb)
-#         X_muthhb = self.decoder22(X_muthhb)
-#         X_na = self.decoder3(X_na)
+#         self.decoder1 = nn.Linear(embed_dim,10)
+#         self.decoder11 = nn.Linear(embed_dim,10)
+#         self.decoder2 = nn.Linear(embed_dim,10)
+#         self.decoder22 = nn.Linear(embed_dim,10)
+#         self.decoder3 = nn.Linear(embed_dim,10)
+        
+#         # act
+#         self.act = nn.ReLU()
+#         self.dropout = nn.Dropout(p=dropout)
+        
+#         # MLP
+#         self.linear1 = nn.Linear(41000, 8192)
+#         self.linear2 = nn.Linear(8192, 2048)
+#         self.linear3 = nn.Linear(2048, 1024)
+#         self.linear4 = nn.Linear(1024, 256)
+#         self.linear5 = nn.Linear(256, 1)
+        
+    
+#     def forward(self, X_ori, X_mut, X_orihhb, X_muthhb, X_na, mask=None):
 
-#         # reshape (batch_size, seq_length, d_model)
-#         # reshape X_ori, X_mut, X_orihhb, X_muthhb, X_na
-#         X_ori = X_ori.permute(1,0,2); X_mut = X_mut.permute(1,0,2)
-#         X_orihhb = X_orihhb.permute(1,0,2); X_muthhb = X_muthhb.permute(1,0,2)
-#         X_na = X_na.permute(1,0,2)
+#         # X_ori, X_mut
+#         X_ori = self.transencoder1(X_ori, mask=mask)
+#         X_mut = self.transencoder2(X_mut, mask=mask)
 
+#         # X_orihhb, X_muthhb
+#         X_orihhb = self.transencoder3(X_orihhb, mask=mask)
+#         X_muthhb = self.transencoder4(X_muthhb, mask=mask)
+
+#         # X_na
+#         X_na = self.transencoder5(X_na, mask=mask)
+        
+#         # decoder
+#         X_ori = self.decoder1(X_ori); X_ori = self.act(X_ori); X_ori = self.dropout(X_ori)
+#         X_mut = self.decoder11(X_mut); X_mut = self.act(X_mut); X_mut = self.dropout(X_mut)
+#         X_orihhb = self.decoder2(X_orihhb); X_orihhb = self.act(X_orihhb); X_orihhb = self.dropout(X_orihhb)
+#         X_muthhb = self.decoder22(X_muthhb); X_muthhb = self.act(X_muthhb); X_muthhb = self.dropout(X_muthhb)
+#         X_na = self.decoder3(X_na); X_na = self.act(X_na); X_na = self.dropout(X_na)
+
+#         # flatten
 #         X_ori = torch.flatten(X_ori,1,2); X_mut = torch.flatten(X_mut,1,2)
 #         X_orihhb = torch.flatten(X_orihhb,1,2); X_muthhb = torch.flatten(X_muthhb,1,2)
 #         X_na = torch.flatten(X_na,1,2)
 
-#         # deco
-#         X_ori = self.deco1(X_ori); X_ori = self.act(X_ori)
-#         X_mut = self.deco11(X_mut); X_mut = self.act(X_mut)
-#         X_orihhb = self.deco2(X_orihhb); X_orihhb = self.act(X_orihhb)
-#         X_muthhb = self.deco22(X_muthhb); X_muthhb = self.act(X_muthhb)
-#         X_na = self.deco3(X_na); X_na = self.act(X_na)
-
 #         output = torch.concat((X_ori, X_mut, X_orihhb, X_muthhb, X_na), 1)
-#         # output = output.permute(1,0,2)
-#         # output = torch.flatten(output,1,2)
 
-#         output = self.linear1(output)
-#         output = self.act(output); output = self.dropout(output)
+#         # MLP
+#         output = self.linear1(output); output = self.act(output); output = self.dropout(output)
 #         output = self.linear2(output); output = self.act(output)
 #         output = self.linear3(output); output = self.act(output)
-#         output = self.linearout(output)
+#         output = self.linear4(output); output = self.act(output)
+#         output = self.linear5(output)
 
 #         return output
-    
-#     def _generate_square_subsequent_mask(self,sz):
-#         mask = (torch.triu(torch.ones(sz, sz)) == 1).transpose(0, 1)
-#         mask = mask.float().masked_fill(mask == 0, float('-inf')).masked_fill(mask == 1, float(0.0))
-#         return mask
 
 class Trans(nn.Module):
     def __init__(self, hidden_layers=1, nhead=10, pro_model=20, hhb_model=30, na_model=4, embed_dim=60, dropout=0.1):
@@ -369,19 +315,26 @@ class Trans(nn.Module):
         self.transencoder4 = TransformerEncoder(hidden_layers, vocab_size=hhb_model, embed_dim=embed_dim, num_heads=nhead)
         self.transencoder5 = TransformerEncoder(hidden_layers, vocab_size=na_model, embed_dim=embed_dim, num_heads=nhead)
         
+        # deco
+        self.deco1 = nn.Linear(embed_dim,10)
+        self.deco11 = nn.Linear(embed_dim,10)
+        self.deco2 = nn.Linear(embed_dim,10)
+        self.deco22 = nn.Linear(embed_dim,10)
+        self.deco3 = nn.Linear(embed_dim,10)
+
         # decoder
-        self.decoder1 = nn.Linear(embed_dim,10)
-        self.decoder11 = nn.Linear(embed_dim,10)
-        self.decoder2 = nn.Linear(embed_dim,10)
-        self.decoder22 = nn.Linear(embed_dim,10)
-        self.decoder3 = nn.Linear(embed_dim,10)
+        self.decoder1 = nn.Linear(10*1000,4096)
+        self.decoder11 = nn.Linear(10*1000,4096)
+        self.decoder2 = nn.Linear(10*1000,4096)
+        self.decoder22 = nn.Linear(10*1000,4096)
+        self.decoder3 = nn.Linear(10*100,1000)
 
         # act
         self.act = nn.ReLU()
         self.dropout = nn.Dropout(p=dropout)
         
         # MLP
-        self.linear1 = nn.Linear(41000, 8192)
+        self.linear1 = nn.Linear(17384, 8192)
         self.linear2 = nn.Linear(8192, 2048)
         self.linear3 = nn.Linear(2048, 1024)
         self.linear4 = nn.Linear(1024, 256)
@@ -401,7 +354,18 @@ class Trans(nn.Module):
         # X_na
         X_na = self.transencoder5(X_na, mask=mask)
         
+        # deco
+        X_ori = self.deco1(X_ori); X_ori = self.act(X_ori)
+        X_mut = self.deco11(X_mut); X_mut = self.act(X_mut)
+        X_orihhb = self.deco2(X_orihhb); X_orihhb = self.act(X_orihhb)
+        X_muthhb = self.deco22(X_muthhb); X_muthhb = self.act(X_muthhb)
+        X_na = self.deco3(X_na); X_na = self.act(X_na)
+
         # decoder
+        X_ori = torch.flatten(X_ori,1,2); X_mut = torch.flatten(X_mut,1,2)
+        X_orihhb = torch.flatten(X_orihhb,1,2); X_muthhb = torch.flatten(X_muthhb,1,2)
+        X_na = torch.flatten(X_na,1,2)
+
         X_ori = self.decoder1(X_ori); X_ori = self.act(X_ori); X_ori = self.dropout(X_ori)
         X_mut = self.decoder11(X_mut); X_mut = self.act(X_mut); X_mut = self.dropout(X_mut)
         X_orihhb = self.decoder2(X_orihhb); X_orihhb = self.act(X_orihhb); X_orihhb = self.dropout(X_orihhb)
@@ -409,10 +373,6 @@ class Trans(nn.Module):
         X_na = self.decoder3(X_na); X_na = self.act(X_na); X_na = self.dropout(X_na)
 
         # flatten
-        X_ori = torch.flatten(X_ori,1,2); X_mut = torch.flatten(X_mut,1,2)
-        X_orihhb = torch.flatten(X_orihhb,1,2); X_muthhb = torch.flatten(X_muthhb,1,2)
-        X_na = torch.flatten(X_na,1,2)
-
         output = torch.concat((X_ori, X_mut, X_orihhb, X_muthhb, X_na), 1)
 
         # MLP
