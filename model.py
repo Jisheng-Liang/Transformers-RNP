@@ -383,3 +383,85 @@ class Trans(nn.Module):
         output = self.linear5(output)
 
         return output
+
+class Trans_pdb(nn.Module):
+    def __init__(self, hidden_layers=1, nhead=10, pro_model=20, hhb_model=30, na_model=4, embed_dim=60, dropout=0.1):
+        super(Trans_pdb, self).__init__()
+
+        # TransformerEncoder
+        self.transencoder1 = TransformerEncoder(hidden_layers, vocab_size=pro_model, embed_dim=embed_dim, num_heads=nhead)
+        self.transencoder2 = TransformerEncoder(hidden_layers, vocab_size=pro_model, embed_dim=embed_dim, num_heads=nhead)
+        self.transencoder3 = TransformerEncoder(hidden_layers, vocab_size=hhb_model, embed_dim=embed_dim, num_heads=nhead)
+        self.transencoder4 = TransformerEncoder(hidden_layers, vocab_size=hhb_model, embed_dim=embed_dim, num_heads=nhead)
+        self.transencoder5 = TransformerEncoder(hidden_layers, vocab_size=na_model, embed_dim=embed_dim, num_heads=nhead)
+        self.transencoder6 = TransformerEncoder(hidden_layers, vocab_size=na_model, embed_dim=embed_dim, num_heads=nhead)
+
+        # deco
+        self.deco1 = nn.Linear(embed_dim,10)
+        self.deco11 = nn.Linear(embed_dim,10)
+        self.deco2 = nn.Linear(embed_dim,10)
+        self.deco22 = nn.Linear(embed_dim,10)
+        self.deco3 = nn.Linear(embed_dim,10)
+        self.deco4 = nn.Linear(embed_dim,10)
+
+        # decoder
+        self.decoder1 = nn.Linear(10*1000,4096)
+        self.decoder11 = nn.Linear(10*1000,4096)
+        self.decoder2 = nn.Linear(10*1000,4096)
+        self.decoder22 = nn.Linear(10*1000,4096)
+        self.decoder3 = nn.Linear(10*100,1000)
+        self.decoder4 = nn.Linear(10*1000,1000)
+
+        # act
+        self.act = nn.ReLU()
+        self.dropout = nn.Dropout(p=dropout)
+        
+        # MLP
+        self.linear1 = nn.Linear(18384, 8192)
+        self.linear2 = nn.Linear(8192, 2048)
+        self.linear3 = nn.Linear(2048, 1024)
+        self.linear4 = nn.Linear(1024, 256)
+        self.linear5 = nn.Linear(256, 1)
+        
+    
+    def forward(self, X_ori, X_mut, X_orihhb, X_muthhb, X_na, X_pdb):
+
+        # X_ori, X_mut
+        X_ori = self.transencoder1(X_ori)
+        X_mut = self.transencoder2(X_mut)
+        # X_orihhb, X_muthhb
+        X_orihhb = self.transencoder3(X_orihhb)
+        X_muthhb = self.transencoder4(X_muthhb)
+        # X_na, X_pdb
+        X_na = self.transencoder5(X_na)
+        X_pdb = self.transencoder6(X_pdb)
+        # deco
+        X_ori = self.deco1(X_ori); X_ori = self.act(X_ori)
+        X_mut = self.deco11(X_mut); X_mut = self.act(X_mut)
+        X_orihhb = self.deco2(X_orihhb); X_orihhb = self.act(X_orihhb)
+        X_muthhb = self.deco22(X_muthhb); X_muthhb = self.act(X_muthhb)
+        X_na = self.deco3(X_na); X_na = self.act(X_na)
+        X_pdb = self.deco4(X_pdb); X_pdb = self.act(X_pdb)
+        # decoder
+        X_ori = torch.flatten(X_ori,1,2); X_mut = torch.flatten(X_mut,1,2)
+        X_orihhb = torch.flatten(X_orihhb,1,2); X_muthhb = torch.flatten(X_muthhb,1,2)
+        X_na = torch.flatten(X_na,1,2); X_pdb = torch.flatten(X_pdb,1,2)
+        X_ori = self.decoder1(X_ori); X_ori = self.act(X_ori); X_ori = self.dropout(X_ori)
+        X_mut = self.decoder11(X_mut); X_mut = self.act(X_mut); X_mut = self.dropout(X_mut)
+        X_orihhb = self.decoder2(X_orihhb); X_orihhb = self.act(X_orihhb); X_orihhb = self.dropout(X_orihhb)
+        X_muthhb = self.decoder22(X_muthhb); X_muthhb = self.act(X_muthhb); X_muthhb = self.dropout(X_muthhb)
+        X_na = self.decoder3(X_na); X_na = self.act(X_na); X_na = self.dropout(X_na)
+        X_pdb = self.decoder4(X_pdb); X_pdb = self.act(X_pdb); X_pdb = self.dropout(X_pdb)
+
+        # flatten
+        output = torch.concat((X_ori, X_mut, X_orihhb, X_muthhb, X_na, X_pdb), 1)
+
+        # MLP
+        output = self.linear1(output); output = self.act(output); output = self.dropout(output)
+        output = self.linear2(output); output = self.act(output)
+        output = self.linear3(output); output = self.act(output)
+        output = self.linear4(output); output = self.act(output)
+        output = self.linear5(output)
+
+        return output
+    
