@@ -91,6 +91,27 @@ def hhblits_encoder(hhm_path,df):
     ori_hhb = np.array(ori_hhb)
     return ori_hhb, mut_hhb
 
+def pdb_encoder(df):
+    pdblist = []
+    row = df.shape[0]
+    seq_len = 1000
+    pdb_root = "data/pdb/"
+    for i in range(row):
+        UniProt_ID = df.iloc[i,5]
+        pdb_path = pdb_root + UniProt_ID + '.txt'
+        pdb_matrix = np.loadtxt(pdb_path)
+
+        # padding
+        if pdb_matrix.shape[0]<seq_len:
+            z = np.zeros((seq_len-pdb_matrix.shape[0],4))
+            pdb_matrix = np.vstack((pdb_matrix,z))
+        else:
+            pdb_matrix = pdb_matrix[:seq_len,:]
+        
+        pdblist.append(pdb_matrix)
+    pdb_encode = np.array(pdblist)
+    return pdb_encode
+
 # def train_val_test_split(df, pro_ori, pro_mut ,hhb_ori ,hhb_mut ,na):
 #     row = df.shape[0]
 #     full_list = list(range(row))
@@ -125,51 +146,3 @@ def hhblits_encoder(hhm_path,df):
 #                [y[i] for i in sam_test]
 #                ]
 #     return XY_train, XY_val, XY_test
-
-
-class tensorDataset(object):
-
-    def __init__(self, root_dir, data_csv, hhblits_dir):
-        self.root_dir = root_dir
-        self.data_csv = root_dir + data_csv
-        self.hhblits_dir = root_dir + hhblits_dir
-        self.df = pd.read_csv(self.data_csv)
-    
-    def data(self):
-        pro_ori = pro_encoder(self.df,'origin'); pro_ori = torch.tensor(pro_ori, dtype=torch.float)
-        pro_mut = pro_encoder(self.df,'mutant'); pro_mut = torch.tensor(pro_mut, dtype=torch.float)
-        na = na_encoder(self.df); na = torch.tensor(na, dtype=torch.float)
-        hhb_ori, hhb_mut = hhblits_encoder(self.hhblits_dir,self.df)
-        hhb_ori, hhb_mut = torch.tensor(hhb_ori, dtype=torch.float), torch.tensor(hhb_mut, dtype=torch.float)
-        y = self.df['ddG(kcal/mol)'].values.tolist(); y = torch.tensor(y, dtype=torch.float)
-
-        row = self.df.shape[0]
-        idx_tr = round(row*0.8);idx_ts = round(row*0.1)
-        ran_spl = [idx_tr,idx_ts,row-idx_tr-idx_ts]
-
-        dataset = TensorDataset(pro_ori, pro_mut, hhb_ori, hhb_mut, na, y)
-        train_dataset, val_dataset, test_dataset = random_split(dataset, lengths = ran_spl)
-
-        return train_dataset, val_dataset, test_dataset
-
-def pdb_encoder(pdb_path,df):
-    ori_hhb = []
-    seq_len = 1000
-    row = df.shape[0]
-
-    for i in range(row):
-        # retrieve mut hhb
-        
-        ori_path = pdb_path + '/pro_ori_' + str(df.iloc[i,0]) + '.txt'
-        ori_matrix = np.loadtxt(ori_path)
-
-        # padding
-        if ori_matrix.shape[0]<seq_len:
-            z = np.zeros((seq_len-ori_matrix.shape[0],30))
-            ori_matrix = np.vstack((ori_matrix,z))
-        else:
-            ori_matrix = ori_matrix[:seq_len,:]
-        
-        ori_hhb.append(ori_matrix)
-    ori_hhb = np.array(ori_hhb)
-    return ori_hhb
