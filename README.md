@@ -3,9 +3,11 @@ Predicting the mutation effect on the stability of Protein-RNA complex with deep
 ![figure2](https://github.com/Jisheng-Liang/Transformers-RNP/assets/53801271/85821451-aa30-45b2-bb23-20507e88f567)
 
 ## Requirements and Environment
-- python == 3.10
-- pytorch == 1.12.1
+- onnxruntime
+- numpy
+- pandas
 - [HH-suite](https://github.com/soedinglab/hh-suite) for generating HHblits files from protein sequences (with the file suffix of .hhm)
+- [AlphaFold2_predicted_PDB](https://alphafold.ebi.ac.uk/download) for downloading PDB files as predicted by AlphaFold2.
 
 ## Dataset
 * The use of ProNAB Dataset has been approved by the author. ProNAB Dataset will not be disclosed in this repository. You may try your own dataset on training and testing.
@@ -20,4 +22,16 @@ python main.py
 ```
 python test.py
 ```
+
+## Inference
+# 1. Generate Space-HHBlits file from HH-suite and AlphaFold2 result
+```
+python data/preprocess/space-hhblits.py
+```
+# 2. Input all the information for inference
+For example,
+```
+python inference.py --original MEATMDQTQPLNEKQVPNSEGCYVWQVSDMNRLRRFLCFGSEGGTYYIEEKKLGQENAEALLRLIEDGKGCEVVQEIKTFSQEGRAAKQEPTLFALAVCSQCSDIKTKQAAFRAVPEVCRIPTHLFTFIQFKKDLKEGMKCGMWGRALRKAVSDWYNTKDALNLAMAVTKY --mutation 307I --rna cacugcuucccuugacuagccu
+```
+
 ## Citation
