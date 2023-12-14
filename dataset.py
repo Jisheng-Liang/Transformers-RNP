@@ -1,10 +1,5 @@
-from torch.utils.data import random_split, TensorDataset
-import pandas as pd
 import numpy as np
-import glob
-import random
-import torch
-
+import re
 def seq_encoder(seq, max_len, unique_char):
     """
     Function defined using all unique characters in our
@@ -36,39 +31,30 @@ def seq_encoder(seq, max_len, unique_char):
         seq_matrix[index,seq2index[char]] = 1
     return seq_matrix
 
-def pro_encoder(df,type):
-    if type == 'origin':
-        select = 'Fragment'
-    elif type == 'mutant':
-        select = 'Sequence'
-    else:
-        None
-    pro_seq = df[select].tolist()
+def pro_encoder(seq):
+    seq = ["".join(list(re.sub(r"[UZOB]", "X", sequence))) for sequence in seq]
     unique_pro = list('GAVLIPFYWSTCMNQDEKRH'); max_pro = 1000
-    pro_encode = [seq_encoder(i,max_pro,unique_pro) for i in pro_seq]
-    pro_encode = np.array(pro_encode)
+    pro_encode = [seq_encoder(i,max_pro,unique_pro) for i in seq]
+    pro_encode = np.array(pro_encode, dtype=np.float32)
     return pro_encode
 
-def na_encoder(df):
-    na_seq = []
-    row = df.shape[0]
-    for i in range(row):
-        na_seq.append(df.iloc[i,14])
-    unique_na = list('agcu'); max_na = 100
+def na_encoder(seq):
+    na_seq = ["".join(list(re.sub(r"[u]", "t", sequence))) for sequence in seq]
+    unique_na = list('agct'); max_na = 100
     na_encode = [seq_encoder(i, max_na, unique_na) for i in na_seq]
-    na_encode = np.array(na_encode)
+    na_encode = np.array(na_encode, dtype=np.float32)
     return na_encode
 
-def hhblits_encoder(hhm_path,df):
+def hhblits_encoder(hhm_path, id):
     mut_hhb = []
     ori_hhb = []
     seq_len = 1000
-    row = df.shape[0]
 
-    for i in range(row):
-        # retrieve mut hhb
-        mut_path = hhm_path + '/pro_mut_' + str(df.iloc[i,0]) + '.hhm'
-        ori_path = hhm_path + '/pro_ori_' + str(df.iloc[i,0]) + '.hhm'
+    # retrieve mut hhb
+
+    for i in id:
+        mut_path = hhm_path + 'pro_mut_' + str(i) + '.hhm'
+        ori_path = hhm_path + 'pro_ori_' + str(i) + '.hhm'
         mut_matrix = np.loadtxt(mut_path)
         ori_matrix = np.loadtxt(ori_path)
 
@@ -87,8 +73,70 @@ def hhblits_encoder(hhm_path,df):
         
         mut_hhb.append(mut_matrix)
         ori_hhb.append(ori_matrix)
-    mut_hhb = np.array(mut_hhb)
-    ori_hhb = np.array(ori_hhb)
+    mut_hhb = np.array(mut_hhb, dtype=np.float32)
+    ori_hhb = np.array(ori_hhb, dtype=np.float32)
+    return ori_hhb, mut_hhb
+
+def shhblits_encoder(hhm_path, id):
+    mut_hhb = []
+    ori_hhb = []
+    seq_len = 1000
+
+    # retrieve mut hhb
+
+    for i in id:
+        mut_path = hhm_path + 'pro_mut_' + str(i) + '.shhm'
+        ori_path = hhm_path + 'pro_ori_' + str(i) + '.shhm'
+        mut_matrix = np.loadtxt(mut_path)
+        ori_matrix = np.loadtxt(ori_path)
+
+        # padding
+        if mut_matrix.shape[0]<seq_len:
+            z = np.zeros((seq_len-mut_matrix.shape[0],30))
+            mut_matrix = np.vstack((mut_matrix,z))
+        else:
+            mut_matrix = mut_matrix[:seq_len,:]
+        
+        if ori_matrix.shape[0]<seq_len:
+            z = np.zeros((seq_len-ori_matrix.shape[0],30))
+            ori_matrix = np.vstack((ori_matrix,z))
+        else:
+            ori_matrix = ori_matrix[:seq_len,:]
+        
+        mut_hhb.append(mut_matrix)
+        ori_hhb.append(ori_matrix)
+    mut_hhb = np.array(mut_hhb, dtype=np.float32)
+    ori_hhb = np.array(ori_hhb, dtype=np.float32)
+    return ori_hhb, mut_hhb
+
+def shhblits(ori_path, mut_path):
+    mut_hhb = []
+    ori_hhb = []
+    seq_len = 1000
+
+    # retrieve mut hhb
+
+    mut_matrix = np.loadtxt(mut_path)
+    ori_matrix = np.loadtxt(ori_path)
+
+    # padding
+    if mut_matrix.shape[0]<seq_len:
+        z = np.zeros((seq_len-mut_matrix.shape[0],30))
+        mut_matrix = np.vstack((mut_matrix,z))
+    else:
+        mut_matrix = mut_matrix[:seq_len,:]
+    
+    if ori_matrix.shape[0]<seq_len:
+        z = np.zeros((seq_len-ori_matrix.shape[0],30))
+        ori_matrix = np.vstack((ori_matrix,z))
+    else:
+        ori_matrix = ori_matrix[:seq_len,:]
+    
+    mut_hhb.append(mut_matrix)
+    ori_hhb.append(ori_matrix)
+
+    mut_hhb = np.array(mut_hhb, dtype=np.float32)
+    ori_hhb = np.array(ori_hhb, dtype=np.float32)
     return ori_hhb, mut_hhb
 
 def pdb_encoder(df):
