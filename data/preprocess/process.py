@@ -1,52 +1,59 @@
 import pandas as pd
 
-# file = 'NA-Pro.csv'
-# df = pd.read_csv(file,encoding='gb18030')
+file = 'lang_rna.csv'
+df = pd.read_csv(file)
 
-# row,col =df.shape
+row,col =df.shape
 
-# for i in range(row):
-#     seq = df.iloc[i,4]
-#     seq = seq.replace('\n','')
-#     seq = seq.upper()
-#     df.iloc[i,4] = seq
+for i in range(row):
+    seq = df.iloc[i,4]
+    seq = seq.replace('\n','')
+    seq = seq.upper()
+    df.iloc[i,4] = seq
 
-# df = df[(df['Mutation_protein'] != 'wild') & (df['Mutation_nucleic_acid'] == 'wild')]
-# df.to_csv('0.csv',index=False)
+# protein for direct prediction
+df.to_csv('0.csv',index=False)
 
-# mutant protein and unmutant DNA & RNA
-# file = '0.csv'
-# df = pd.read_csv(file)
-# df = df[df['Type_nuc'] == 'RNA']
-# row,col = df.shape
-# tab = 'AUGCaugc '
-# tab = list(tab)
-# for j in range(row):
-#     seq = list(df.iloc[j,14])
-#     new_seq = []
-#     exit_flag = False
-#     for k in range(len(seq)):
-#         if seq[k] in tab:
-#             if seq[k] == ' ':
-#                 continue
-#             else:
-#                 new_seq.append(seq[k])
-#         else:
-#             df.iloc[j,14] = '-'
-#             exit_flag = True
-#             break
-#     if exit_flag:
-#         continue
-#     new_seq = ''.join(new_seq)
-#     new_seq = new_seq.lower()
-#     df.iloc[j,14] = new_seq
-# df = df[df['Sequence_wild1'] != '-']
+# mutant protein and unmutant RNA
+file = '0.csv'
+df = pd.read_csv(file)
+df = df[df['Type_nuc'] == 'RNA']
+row,col = df.shape
+tab = 'AUGCaugc'
+tab = list(tab)
+number = list('0123456789')
+for j in range(row):
+    seq = list(df.iloc[j,14])
+    new_seq = ""
+    for k in range(len(seq)):
+        if seq[k] in tab:
+            new_seq += seq[k]
+        else:
+            if seq[k] == "(":
+                base = ""
+                k += 1
+                while(k < len(seq) and seq[k] != ")"):
+                    if seq[k] in tab:
+                        base += seq[k]
+                    k += 1
+                k += 1
+                num = ""
+                while(k < len(seq) and seq[k] in number):
+                    num += seq[k]
+                    k += 1
+                if num == "": num = 1
+                new_seq += base * int(num)
+    new_seq = new_seq.lower()
+    if len(new_seq) < 4:
+        new_seq = '-'
+    df.iloc[j,14] = new_seq
 
-# print(df.shape)
-# df.to_csv('1_rna.csv', index=False)
+df = df[df['Sequence_wild1'] != '-']
+
+print(df.shape)
+df.to_csv('1_rna.csv', index=False)
 
 # # mutant protein and mutant NA
-
 # row,col = df.shape
 # tab = 'ATGCUatgcu '
 # tab = list(tab)
@@ -72,18 +79,22 @@ import pandas as pd
 # df.to_csv('1_mutNA.csv', index=False)
 
 # code for mutant Protein
-file = '1_dna.csv'
+file = '1_rna.csv'
 df = pd.read_csv(file)
 row, col = df.shape
-
 for i in range(row):
     seq = df.iloc[i,10]
+    # unmutant protein unchanged
+    if seq == 'wild':
+        continue
     pro_s = list(df.iloc[i,4])
     # print(seq)
     if ',' in seq:
         seq = seq.split(', ')
         print(seq)
         for j in range(len(seq)):
+            if seq[j] == "?CT":
+                continue
             cha = list(seq[j])
             pos = ''.join(cha[1:len(cha)-1])
             pro_s[int(pos)-1] = cha[len(cha)-1]
@@ -136,7 +147,7 @@ for i in range(row):
     pro_s = ''.join(pro_s)
     df.iloc[i,2] = pro_s.upper()
 
-Tab = 'GAVLIPFYWSTCMNQDEKRHgavlipfywstcmnqdekrh'
+Tab = 'GAVLIPFYWSTCMNQDEKRH'
 Tab = list(Tab)
 row, col = df.shape
 for i in [2,4]:
@@ -156,9 +167,9 @@ for i in [2,4]:
         new_seq = ''.join(new_seq)
         new_seq = new_seq.upper()
         df.iloc[j,i] = new_seq
-df = df[df['Sequence'] != '-']
+df = df[df['ddG(kcal/mol)'] != '-']
 df = df[df['Fragment'] != '-']
 
 df = df.drop_duplicates()
-df.to_csv('final_dna.csv',index=False)
+df.to_csv('ddg.csv',index=False)
 print(df.shape)
