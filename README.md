@@ -8,7 +8,7 @@ Predicting the mutation effect on the stability of Protein-RNA complex with deep
 - pandas
 - [HH-suite](https://github.com/soedinglab/hh-suite) for generating HHblits files from protein sequences (with the file suffix of .hhm)
 - [AlphaFold2_predicted_PDB](https://alphafold.ebi.ac.uk/download) for downloading PDB files as predicted by AlphaFold2.
-- ONNX version of Transformers-RNP dowmload(https://pan.baidu.com/s/1s00MiMwoWc56mHP20-Jdtg?pwd=4j9u password：4j9u)
+- ONNX version of Transformers-RNP download(https://pan.baidu.com/s/1s00MiMwoWc56mHP20-Jdtg?pwd=4j9u password：4j9u)
 
 ## Dataset
 * The use of ProNAB Dataset has been approved by the author. ProNAB Dataset will not be disclosed in this repository. You may try your own dataset on training and testing.
